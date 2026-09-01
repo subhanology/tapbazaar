@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@theme {
+  /* Colors — from the Airbnb design system */
+  --color-rausch: #ff385c;
+  --color-rausch-dark: #e00b41;
+  --color-error: #c13515;
+  --color-error-dark: #b32505;
+  --color-luxe: #460479;
+  --color-plus: #92174d;
+  --color-ink: #222222;
+  --color-ink-focused: #3f3f3f;
+  --color-ink-secondary: #6a6a6a;
+  --color-ink-disabled: rgba(0, 0, 0, 0.24);
+  --color-legal: #428bff;
+  --color-border: #c1c1c1;
+  --color-surface: #f2f2f2;
+
+  /* Font */
+  --font-cereal: "Airbnb Cereal VF", Circular, -apple-system, system-ui, Roboto, "Helvetica Neue", sans-serif;
+
+  /* Border radius */
+  --radius-btn: 8px;
+  --radius-badge: 14px;
+  --radius-card: 20px;
+  --radius-lg2: 32px;
+
+  /* Shadows */
+  --shadow-card: rgba(0, 0, 0, 0.02) 0px 0px 0px 1px, rgba(0, 0, 0, 0.04) 0px 2px 6px, rgba(0, 0, 0, 0.1) 0px 4px 8px;
+  --shadow-hover: rgba(0, 0, 0, 0.08) 0px 4px 12px;
+
+  /* Letter spacing */
+  --tracking-heading: -0.44px;
+  --tracking-subheading: -0.18px;
+}
+
+@layer base {
+  body {
+    background-color: #fff;
+    color: var(--color-ink);
+    font-family: var(--font-cereal);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
