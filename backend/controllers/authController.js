@@ -6,7 +6,6 @@ const { generateTokenAndSetCookie } = require('../utils/generateToken');
 const signupSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8, 'Password must be at least 8 characters'),
-  displayPicture: z.string().url().optional().or(z.literal('')),
 });
 
 const signinSchema = z.object({
@@ -17,7 +16,7 @@ const signinSchema = z.object({
 // POST /api/auth/signup
 const signup = async (req, res, next) => {
   try {
-    const { email, password, displayPicture } = signupSchema.parse(req.body);
+    const { email, password } = signupSchema.parse(req.body);
 
     const existing = await User.findOne({ email: email.toLowerCase() });
     if (existing) {
@@ -27,7 +26,7 @@ const signup = async (req, res, next) => {
     const salt = await bcrypt.genSalt(10); // min salt rounds = 10 per security spec
     const passwordHash = await bcrypt.hash(password, salt);
 
-    const user = await User.create({ email, passwordHash, displayPicture: displayPicture || '' });
+    const user = await User.create({ email, passwordHash });
 
     generateTokenAndSetCookie(res, user._id);
 

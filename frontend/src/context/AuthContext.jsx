@@ -32,8 +32,12 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  // Lets pages like Account.jsx push a fresh user object (e.g. after a
+  // profile picture upload) into context without a full refetch/reload.
+  const updateUser = (updatedUser) => setUser(updatedUser);
+
   return (
-    <AuthContext.Provider value={{ user, loading, signup, signin, signout }}>
+    <AuthContext.Provider value={{ user, loading, signup, signin, signout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

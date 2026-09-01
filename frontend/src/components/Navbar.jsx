@@ -1,18 +1,13 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 //import { useCart } from '../context/CartContext';
 import SearchBar from './SearchBar';
+import AccountMenu from './AccountMenu';
 
 const Navbar = () => {
-  const { user, signout } = useAuth();
+  const { user } = useAuth();
   //const { cart } = useCart();
-  const navigate = useNavigate();
   //const itemCount = cart?.items?.reduce((sum, i) => sum + i.quantity, 0) || 0;
-
-  const handleSignout = async () => {
-    await signout();
-    navigate('/');
-  };
 
   return (
     <header className="sticky top-0 z-30 w-full border-b border-border/40 bg-white/95 backdrop-blur">
@@ -39,12 +34,7 @@ const Navbar = () => {
           </Link> */}
 
           {user ? (
-            <button
-              onClick={handleSignout}
-              className="rounded-btn bg-ink px-4 py-2 text-white transition hover:shadow-hover"
-            >
-              Sign out
-            </button>
+            <AccountMenu />
           ) : (
             <Link to="/signin" className="rounded-btn bg-ink px-4 py-2 text-white transition hover:shadow-hover">
               Sign in

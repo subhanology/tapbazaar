@@ -18,6 +18,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    displayPicturePublicId: {
+      type: String,
+      default: '',
+    },
   },
   { timestamps: true }
 );
@@ -26,6 +30,7 @@ const userSchema = new mongoose.Schema(
 userSchema.set('toJSON', {
   transform: (_doc, ret) => {
     delete ret.passwordHash;
+    delete ret.displayPicturePublicId;
     return ret;
   },
 });

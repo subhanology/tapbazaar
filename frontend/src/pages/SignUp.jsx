@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 const SignUp = () => {
   const { signup } = useAuth();
   //const { mergeGuestCartIntoAccount } = useCart();
-  const [form, setForm] = useState({ email: '', password: '', displayPicture: '' });
+  const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -41,13 +41,6 @@ const SignUp = () => {
           placeholder="Password (min. 8 characters)"
           value={form.password}
           onChange={(e) => setForm({ ...form, password: e.target.value })}
-          className="w-full rounded-btn border border-border/60 px-4 py-3 text-sm outline-none focus:shadow-hover"
-        />
-        <input
-          type="url"
-          placeholder="Display picture URL (optional)"
-          value={form.displayPicture}
-          onChange={(e) => setForm({ ...form, displayPicture: e.target.value })}
           className="w-full rounded-btn border border-border/60 px-4 py-3 text-sm outline-none focus:shadow-hover"
         />
         {error && <p className="text-xs text-error">{error}</p>}

@@ -43,3 +43,7 @@
     -moz-osx-font-smoothing: grayscale;
   }
 }
+
+/* Airbnb Cereal VF isn't a freely-licensed webfont — swap in the real font
+   file/CDN link here when you have a license. System fallback keeps the
+   same warm, medium-weight feel in the meantime. */
