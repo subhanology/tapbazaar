@@ -8,7 +8,7 @@ const ProductCard = ({ product }) => (
     <div className="aspect-[4/3] w-full overflow-hidden bg-surface">
       {product.images?.[0] ? (
         <img
-          src={product.images[0]}
+          src={product.images[0].url}
           alt={product.title}
           className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
         />

@@ -9,7 +9,7 @@ const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
-// const productRoutes = require('./routes/productRoutes');
+const productRoutes = require('./routes/productRoutes');
 // const commentUpdateRoutes = require('./routes/commentUpdateRoutes');
 // const cartRoutes = require('./routes/cartRoutes');
 // const promoRoutes = require('./routes/promoRoutes');
@@ -35,7 +35,7 @@ app.use(cookieParser());
 // --- Routes ---
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-// app.use('/api/products', productRoutes);
+app.use('/api/products', productRoutes);
 // app.use('/api/comments', commentUpdateRoutes); 
 // app.use('/api/cart', cartRoutes);
 // app.use('/api/promo', promoRoutes);

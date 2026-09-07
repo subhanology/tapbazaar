@@ -8,6 +8,9 @@ import SignUp from './pages/SignUp';
 import Account from './pages/Account';
 import MyListings from './pages/MyListings';
 import ProtectedRoute from './components/ProtectedRoute';
+import CreateProduct from './pages/CreateProduct';
+import ProductShow from './pages/ProductShow';
+import EditProduct from './pages/EditProduct';
 // import Cart from './pages/Cart'; // Uncomment when ready
 
 function App() {
@@ -35,6 +38,27 @@ function App() {
               </ProtectedRoute>
             } 
           />
+          
+          {/* --- NEW PRODUCT ROUTES ADDED HERE --- */}
+          <Route 
+            path="/products/new" 
+            element={
+              <ProtectedRoute>
+                <CreateProduct />
+              </ProtectedRoute>
+            } 
+          />
+          <Route path="/products/:id" element={<ProductShow />} />
+          <Route
+          path="/products/:id/edit"
+          element={
+            <ProtectedRoute>
+            <EditProduct />
+            </ProtectedRoute>
+          }
+          />
+          {/* ------------------------------------- */}
+
           {/* <Route path="/cart" element={<Cart />} /> */}
         </Routes>
       {/* </CartProvider> */}

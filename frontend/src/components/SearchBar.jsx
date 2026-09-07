@@ -66,7 +66,7 @@ const SearchBar = () => {
                 className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm hover:bg-surface"
               >
                 {product.images?.[0] && (
-                  <img src={product.images[0]} alt="" className="h-10 w-10 rounded-btn object-cover" />
+                  <img src={product.images[0].url} alt="" className="h-10 w-10 rounded-btn object-cover" />
                 )}
                 <span className="truncate">{product.title}</span>
               </button>

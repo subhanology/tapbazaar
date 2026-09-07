@@ -1,17 +1,22 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import ProductCard from '../components/ProductCard';
+import { useAuth } from '../context/AuthContext'; // Brought this in!
 
 const Home = () => {
+  const { user } = useAuth(); // Grab the logged-in user
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // If a user is logged in, tell the backend to hide their items!
+    const url = user ? `/products?excludeUserId=${user._id}` : '/products';
+
     api
-      .get('/products')
+      .get(url)
       .then((res) => setProducts(res.data.products))
       .finally(() => setLoading(false));
-  }, []);
+  }, [user]); // Add user to dependency array so it updates if they log in/out
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-10">
