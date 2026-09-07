@@ -13,7 +13,7 @@ const productRoutes = require('./routes/productRoutes');
 // const commentUpdateRoutes = require('./routes/commentUpdateRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 // const promoRoutes = require('./routes/promoRoutes');
-// const checkoutRoutes = require('./routes/checkoutRoutes');
+const checkoutRoutes = require('./routes/checkoutRoutes');
 // const searchRoutes = require('./routes/searchRoutes');
 
 connectDB();
@@ -39,7 +39,7 @@ app.use('/api/products', productRoutes);
 // app.use('/api/comments', commentUpdateRoutes); 
 app.use('/api/cart', cartRoutes);
 // app.use('/api/promo', promoRoutes);
-// app.use('/api/checkout', checkoutRoutes);
+app.use('/api/checkout', checkoutRoutes);
 // app.use('/api/search', searchRoutes);
 
 app.get('/api/health', (_req, res) => res.status(200).json({ status: 'ok' }));

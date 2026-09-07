@@ -12,6 +12,11 @@ import CreateProduct from './pages/CreateProduct';
 import ProductShow from './pages/ProductShow';
 import EditProduct from './pages/EditProduct';
 import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 function App() {
   return (
@@ -57,6 +62,16 @@ function App() {
           }
           />
           <Route path="/cart" element={<Cart />} />
+          <Route
+            path="/checkout"
+            element={
+              <ProtectedRoute>
+                <Elements stripe={stripePromise}>
+                  <Checkout />
+                </Elements>
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </CartProvider>
     </AuthProvider>
