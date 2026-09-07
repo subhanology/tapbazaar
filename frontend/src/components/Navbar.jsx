@@ -1,13 +1,14 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-//import { useCart } from '../context/CartContext';
+import { useCart } from '../context/CartContext';
 import SearchBar from './SearchBar';
 import AccountMenu from './AccountMenu';
 
 const Navbar = () => {
   const { user } = useAuth();
-  //const { cart } = useCart();
-  //const itemCount = cart?.items?.reduce((sum, i) => sum + i.quantity, 0) || 0;
+
+  const { cart } = useCart();
+  const itemCount = cart?.items?.reduce((sum, i) => sum + i.quantity, 0) || 0;
 
   return (
     <header className="sticky top-0 z-30 w-full border-b border-border/40 bg-white/95 backdrop-blur">
@@ -24,14 +25,14 @@ const Navbar = () => {
           <Link to="/products/new" className="hidden rounded-btn px-3 py-2 hover:bg-surface sm:inline-block">
             Sell an item
           </Link>
-          {/* <Link to="/cart" className="relative rounded-btn px-3 py-2 hover:bg-surface">
+          <Link to="/cart" className="relative rounded-btn px-3 py-2 hover:bg-surface">
             Cart
             {itemCount > 0 && (
               <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-rausch text-xs font-semibold text-white">
                 {itemCount}
               </span>
             )}
-          </Link> */}
+          </Link>
 
           {user ? (
             <AccountMenu />

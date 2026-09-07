@@ -1,6 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-// import { CartProvider } from './context/CartContext'; // Uncomment when ready
+import { CartProvider } from './context/CartContext';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import SignIn from './pages/SignIn';
@@ -11,12 +11,12 @@ import ProtectedRoute from './components/ProtectedRoute';
 import CreateProduct from './pages/CreateProduct';
 import ProductShow from './pages/ProductShow';
 import EditProduct from './pages/EditProduct';
-// import Cart from './pages/Cart'; // Uncomment when ready
+import Cart from './pages/Cart';
 
 function App() {
   return (
     <AuthProvider>
-      {/* <CartProvider> */}
+      <CartProvider>
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
@@ -39,7 +39,6 @@ function App() {
             } 
           />
           
-          {/* --- NEW PRODUCT ROUTES ADDED HERE --- */}
           <Route 
             path="/products/new" 
             element={
@@ -57,11 +56,9 @@ function App() {
             </ProtectedRoute>
           }
           />
-          {/* ------------------------------------- */}
-
-          {/* <Route path="/cart" element={<Cart />} /> */}
+          <Route path="/cart" element={<Cart />} />
         </Routes>
-      {/* </CartProvider> */}
+      </CartProvider>
     </AuthProvider>
   );
 }

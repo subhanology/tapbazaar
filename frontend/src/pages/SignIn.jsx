@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-//import { useCart } from '../context/CartContext';
+import { useCart } from '../context/CartContext';
 
 const SignIn = () => {
   const { signin } = useAuth();
-  //const { mergeGuestCartIntoAccount } = useCart();
+  const { mergeGuestCartIntoAccount } = useCart();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -15,7 +15,7 @@ const SignIn = () => {
     setError('');
     try {
       await signin(form);
-      //await mergeGuestCartIntoAccount(); // BR-03: guest cart -> account cart
+      await mergeGuestCartIntoAccount(); // BR-03: guest cart -> account cart
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Sign in failed');
