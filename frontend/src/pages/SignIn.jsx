@@ -1,73 +1,80 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { useCart } from '../context/CartContext';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 
-/**
- * Renders the user sign-in page.
- * Authenticates the user credentials, merges any persistent guest cart items into their account cart, 
- * and redirects to the home page upon success.
- * 
- * @returns {JSX.Element} The SignIn component
- */
 const SignIn = () => {
   const { signin } = useAuth();
   const { mergeGuestCartIntoAccount } = useCart();
-  const [form, setForm] = useState({ email: '', password: '' });
-  const [error, setError] = useState('');
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
   const navigate = useNavigate();
-
-  /**
-   * Handles user sign-in submission, error handling, guest cart merging, and routing.
-   * 
-   * @param {React.FormEvent} e - Form submission event
-   */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     try {
       await signin(form);
       await mergeGuestCartIntoAccount();
-      navigate('/');
+      navigate("/");
     } catch (err) {
-      setError(err.response?.data?.message || 'Sign in failed');
+      setError(err.response?.data?.message || "Sign in failed");
     }
   };
-
   return (
-    <main className="mx-auto flex min-h-[calc(100vh-73px)] max-w-sm flex-col justify-center px-6 py-16">
-      <h1 className="mb-1 font-display text-3xl font-semibold tracking-heading text-link">Welcome back</h1>
-      <p className="mb-7 text-sm text-ink-secondary">Sign in to buy, sell, and track your listings.</p>
-      <form onSubmit={handleSubmit} className="space-y-3.5">
-        <input
-          type="email"
-          required
-          placeholder="Email"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-          className="w-full rounded-btn border border-border bg-white px-4 py-3 text-sm text-ink outline-none transition focus:border-link focus:shadow-hover"
-        />
-        <input
-          type="password"
-          required
-          placeholder="Password"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-          className="w-full rounded-btn border border-border bg-white px-4 py-3 text-sm text-ink outline-none transition focus:border-link focus:shadow-hover"
-        />
-        {error && <p className="rounded-btn bg-error-soft px-3 py-2 text-xs text-error">{error}</p>}
-        <button type="submit" className="w-full rounded-btn bg-link py-3 text-sm font-medium text-white transition hover:bg-link-dark hover:shadow-hover">
-          Sign in
-        </button>
-      </form>
-      <p className="mt-5 text-sm text-ink-secondary">
-        New here?{' '}
-        <Link to="/signup" className="font-medium text-primary hover:text-primary-dark">
-          Create an account
-        </Link>
-      </p>
+    <main className="min-h-[calc(100vh-120px)] bg-[#faf9f7] px-5 py-12 md:py-20">
+      <div className="mx-auto max-w-md">
+        <div className="mb-7 text-center">
+          <p className="section-kicker">Welcome back</p>
+          <h1 className="mt-2 text-3xl font-extrabold text-ink">
+            Sign in to TapBazaar
+          </h1>
+          <p className="mt-2 text-sm text-ink-secondary">
+            Continue shopping or manage your listings.
+          </p>
+        </div>
+        <form onSubmit={handleSubmit} className="surface-card p-6 sm:p-8">
+          <label className="block text-xs font-bold text-ink">
+            Email
+            <input
+              type="email"
+              required
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              className="input-modern mt-2"
+              placeholder="you@example.com"
+            />
+          </label>
+          <label className="mt-4 block text-xs font-bold text-ink">
+            Password
+            <input
+              type="password"
+              required
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              className="input-modern mt-2"
+              placeholder="Your password"
+            />
+          </label>
+          {error && (
+            <p className="mt-4 rounded-xl bg-red-50 px-3 py-2 text-xs font-semibold text-error">
+              {error}
+            </p>
+          )}
+          <button type="submit" className="btn-primary mt-5 w-full py-3">
+            Sign in
+          </button>
+          <p className="mt-5 text-center text-sm text-ink-secondary">
+            New here?{" "}
+            <Link
+              to="/signup"
+              className="font-bold text-primary hover:text-primary-dark"
+            >
+              Create an account
+            </Link>
+          </p>
+        </form>
+      </div>
     </main>
   );
 };
-
 export default SignIn;

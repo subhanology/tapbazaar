@@ -1,13 +1,5 @@
-/**
- * Renders a user's avatar. 
- * Displays the user's uploaded profile picture if available, 
- * falling back to an initial-based placeholder otherwise.
- * 
- * @param {Object} props - Component props
- * @param {Object} props.user - The user object containing displayPicture and email
- * @param {number} [props.size=36] - The width and height of the avatar in pixels
- * @returns {JSX.Element} The Avatar component
- */
+// Shows the user's Cloudinary photo if they have one, otherwise a clean
+// initials circle (first letter of their email) so the navbar never looks broken.
 const Avatar = ({ user, size = 36 }) => {
   const initial = user?.email?.[0]?.toUpperCase() || '?';
 

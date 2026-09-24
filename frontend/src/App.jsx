@@ -13,6 +13,7 @@ import ProductShow from './pages/ProductShow';
 import EditProduct from './pages/EditProduct';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
+import Footer from './components/Footer';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 
@@ -73,6 +74,7 @@ function App() {
             }
           />
         </Routes>
+        <Footer />
       </CartProvider>
     </AuthProvider>
   );

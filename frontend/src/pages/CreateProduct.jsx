@@ -1,71 +1,64 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
+import ImageSlotUploader from '../components/ImageSlotUploader';
+import { compressImage } from '../utils/compressImage';
 
 const MAX_IMAGES = 6;
-const MAX_SIZE_MB = 5;
+const MAX_SIZE_MB = 8; // pre-compression limit; files are shrunk before upload
+const CATEGORIES = ['Electronics', 'Fashion', 'Home & Living', 'Books', 'Sports & Outdoors', 'Vehicles', 'Other'];
 
-/**
- * Renders the product creation page.
- * Allows users to input listing details (title, price) and upload multiple images 
- * with validation checks for file count and size limits.
- * 
- * @returns {JSX.Element} The CreateProduct component
- */
+const emptySlots = () => Array.from({ length: MAX_IMAGES }, () => ({ file: null, preview: null }));
+
 const CreateProduct = () => {
   const [title, setTitle] = useState('');
   const [price, setPrice] = useState('');
-  const [files, setFiles] = useState([]);
-  const [previews, setPreviews] = useState([]);
+  const [category, setCategory] = useState('');
+  const [description, setDescription] = useState('');
+  const [slots, setSlots] = useState(emptySlots());
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  /**
-   * Validates selected files for count and size limits.
-   * Generates local object URLs for image previews.
-   * 
-   * @param {React.ChangeEvent<HTMLInputElement>} e - File input change event
-   */
-  const handleFilesChange = (e) => {
+  const handleSelect = (index, file) => {
     setError('');
-    const selected = Array.from(e.target.files || []);
+    if (!file.type.startsWith('image/')) return setError('Please choose an image file.');
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) return setError(`Each image must be smaller than ${MAX_SIZE_MB}MB.`);
 
-    if (selected.length > MAX_IMAGES) {
-      setError(`You can upload up to ${MAX_IMAGES} images.`);
-      return;
-    }
-    const tooBig = selected.find((f) => f.size > MAX_SIZE_MB * 1024 * 1024);
-    if (tooBig) {
-      setError(`Each image must be smaller than ${MAX_SIZE_MB}MB.`);
-      return;
-    }
-
-    setFiles(selected);
-    setPreviews(selected.map((f) => URL.createObjectURL(f)));
+    setSlots((prev) => {
+      const next = [...prev];
+      next[index] = { file, preview: URL.createObjectURL(file) };
+      return next;
+    });
   };
 
-  /**
-   * Submits the new product listing via multipart/form-data.
-   * Redirects the user to the newly created product's detail page upon success.
-   * 
-   * @param {React.FormEvent} e - Form submission event
-   */
+  const handleRemove = (index) => {
+    setSlots((prev) => {
+      const next = [...prev];
+      next[index] = { file: null, preview: null };
+      return next;
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    if (files.length === 0) {
-      setError('At least one product image is required.');
-      return;
-    }
+    const chosenFiles = slots.map((s) => s.file).filter(Boolean);
+    if (chosenFiles.length === 0) return setError('At least one product image is required.');
 
     setSubmitting(true);
     try {
+      // Shrink every photo client-side first — this is what actually makes
+      // uploads fast, since there's far less data to send afterward.
+      const compressedFiles = await Promise.all(chosenFiles.map(compressImage));
+
       const formData = new FormData();
       formData.append('title', title);
       formData.append('price', price);
-      files.forEach((file) => formData.append('images', file));
+      formData.append('category', category);
+      formData.append('description', description);
+      compressedFiles.forEach((file) => formData.append('images', file));
 
       const res = await api.post('/products', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -80,55 +73,61 @@ const CreateProduct = () => {
   };
 
   return (
-    <main className="mx-auto max-w-lg px-6 py-10">
-      <h1 className="mb-6 text-[22px] font-semibold tracking-heading text-ink">List an item</h1>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          required
-          placeholder="Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="w-full rounded-btn border border-border/60 px-4 py-3 text-sm outline-none focus:shadow-hover"
-        />
-        <input
-          required
-          type="number"
-          min="0"
-          step="0.01"
-          placeholder="Price"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          onWheel={(e) => e.target.blur()}
-          className="w-full rounded-btn border border-border/60 px-4 py-3 text-sm outline-none focus:shadow-hover"
-        />
-
-        <div>
-          <label className="inline-block cursor-pointer rounded-btn border border-border/60 px-4 py-3 text-sm text-ink hover:bg-surface">
-            Choose photos (up to {MAX_IMAGES})
-            <input type="file" accept="image/*" multiple onChange={handleFilesChange} className="hidden" />
-          </label>
+    <main className="page-shell py-10 md:py-14">
+      <div className="mx-auto max-w-2xl">
+        <div className="mb-7">
+          <p className="section-kicker">Start selling</p>
+          <h1 className="section-title mt-1">Create a listing</h1>
+          <p className="section-copy mt-2">Add clear details and good photos so buyers know exactly what they're getting.</p>
         </div>
 
-        {previews.length > 0 && (
-          <div className="grid grid-cols-3 gap-2">
-            {previews.map((src, i) => (
-              <img key={i} src={src} alt="" className="aspect-square w-full rounded-btn object-cover" />
-            ))}
+        <form onSubmit={handleSubmit} className="surface-card p-5 sm:p-7">
+          <label className="block text-xs font-bold text-ink">
+            Item title
+            <input required value={title} onChange={(e) => setTitle(e.target.value)} className="input-modern mt-2" placeholder="e.g. Wireless headphones" />
+          </label>
+
+          <div className="mt-5 grid gap-5 sm:grid-cols-2">
+            <label className="block text-xs font-bold text-ink">
+              Price
+              <input required type="number" min="0" step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} onWheel={(e) => e.currentTarget.blur()} className="input-modern mt-2" placeholder="0.00" />
+            </label>
+            <label className="block text-xs font-bold text-ink">
+              Category
+              <select required value={category} onChange={(e) => setCategory(e.target.value)} className="input-modern mt-2">
+                <option value="" disabled>Choose a category</option>
+                {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </label>
           </div>
-        )}
 
-        {error && <p className="text-xs text-error">{error}</p>}
+          <label className="mt-5 block text-xs font-bold text-ink">
+            Description
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={4}
+              maxLength={2000}
+              className="input-modern mt-2 resize-none"
+              placeholder="Condition, dimensions, what's included — anything a buyer would want to know."
+            />
+          </label>
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded-btn bg-primary py-3 text-sm font-medium text-white transition hover:shadow-hover disabled:opacity-50"
-        >
-          {submitting ? 'Publishing...' : 'Publish listing'}
-        </button>
-        <p className="text-xs text-ink-disabled">A unique serial number is generated automatically.</p>
-      </form>
+          <div className="mt-5">
+            <p className="text-xs font-bold text-ink">Product photos</p>
+            <p className="mt-1 text-xs text-ink-secondary">Add up to {MAX_IMAGES} photos — one per box.</p>
+            <div className="mt-2">
+              <ImageSlotUploader slots={slots} onSelect={handleSelect} onRemove={handleRemove} maxImages={MAX_IMAGES} disabled={submitting} />
+            </div>
+          </div>
+
+          {error && <p className="mt-4 rounded-xl bg-red-50 px-3 py-2 text-xs font-semibold text-error">{error}</p>}
+
+          <button type="submit" disabled={submitting} className="btn-primary mt-6 w-full py-3.5 disabled:opacity-50">
+            {submitting ? 'Publishing…' : 'Publish listing'}
+          </button>
+        </form>
+      </div>
     </main>
   );
 };

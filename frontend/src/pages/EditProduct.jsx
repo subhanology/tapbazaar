@@ -1,80 +1,91 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../api/axios';
+import ImageSlotUploader from '../components/ImageSlotUploader';
+import { compressImage } from '../utils/compressImage';
 
 const MAX_IMAGES = 6;
-const MAX_SIZE_MB = 5;
+const MAX_SIZE_MB = 8;
+const CATEGORIES = ['Electronics', 'Fashion', 'Home & Living', 'Books', 'Sports & Outdoors', 'Vehicles', 'Other'];
 
-/**
- * Renders the product editing page.
- * Loads existing product details, handles updates to title, price, and images,
- * and validates new file selections against count and size limits.
- * 
- * @returns {JSX.Element} The EditProduct component
- */
+const emptySlots = () => Array.from({ length: MAX_IMAGES }, () => ({ file: null, preview: null, existingUrl: null, existingPublicId: null }));
+
 const EditProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [title, setTitle] = useState('');
   const [price, setPrice] = useState('');
-  const [existingImages, setExistingImages] = useState([]);
-  const [files, setFiles] = useState([]);
-  const [previews, setPreviews] = useState([]);
+  const [category, setCategory] = useState('');
+  const [description, setDescription] = useState('');
+  const [slots, setSlots] = useState(emptySlots());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    api.get(`/products/${id}`).then((res) => {
-      const p = res.data.product;
-      setTitle(p.title);
-      setPrice(String(p.price));
-      setExistingImages(p.images || []);
-      setLoading(false);
-    });
+    api
+      .get(`/products/${id}`)
+      .then((res) => {
+        const p = res.data.product;
+        setTitle(p.title);
+        setPrice(String(p.price));
+        setCategory(p.category || '');
+        setDescription(p.description || '');
+
+        const loaded = emptySlots();
+        (p.images || []).forEach((img, i) => {
+          if (i < MAX_IMAGES) {
+            loaded[i] = { file: null, preview: null, existingUrl: img.url, existingPublicId: img.publicId };
+          }
+        });
+        setSlots(loaded);
+      })
+      .catch((err) => setError(err.response?.data?.message || 'Could not load listing'))
+      .finally(() => setLoading(false));
   }, [id]);
 
-  /**
-   * Validates selected replacement files for count and size limits.
-   * Generates local object URLs for image previews.
-   * 
-   * @param {React.ChangeEvent<HTMLInputElement>} e - File input change event
-   */
-  const handleFilesChange = (e) => {
+  const handleSelect = (index, file) => {
     setError('');
-    const selected = Array.from(e.target.files || []);
+    if (!file.type.startsWith('image/')) return setError('Please choose an image file.');
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) return setError(`Each image must be smaller than ${MAX_SIZE_MB}MB.`);
 
-    if (selected.length > MAX_IMAGES) {
-      setError(`You can upload up to ${MAX_IMAGES} images.`);
-      return;
-    }
-    const tooBig = selected.find((f) => f.size > MAX_SIZE_MB * 1024 * 1024);
-    if (tooBig) {
-      setError(`Each image must be smaller than ${MAX_SIZE_MB}MB.`);
-      return;
-    }
-
-    setFiles(selected);
-    setPreviews(selected.map((f) => URL.createObjectURL(f)));
+    setSlots((prev) => {
+      const next = [...prev];
+      // A fresh upload replaces whatever was in this slot, existing or not
+      next[index] = { file, preview: URL.createObjectURL(file), existingUrl: null, existingPublicId: null };
+      return next;
+    });
   };
 
-  /**
-   * Submits the updated product listing via multipart/form-data.
-   * Redirects the user back to the product detail page upon success.
-   * 
-   * @param {React.FormEvent} e - Form submission event
-   */
+  const handleRemove = (index) => {
+    setSlots((prev) => {
+      const next = [...prev];
+      next[index] = { file: null, preview: null, existingUrl: null, existingPublicId: null };
+      return next;
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSubmitting(true);
 
     try {
+      const newFiles = slots.map((s) => s.file).filter(Boolean);
+      const keptImages = slots
+        .filter((s) => s.existingUrl && s.existingPublicId)
+        .map((s) => ({ url: s.existingUrl, publicId: s.existingPublicId }));
+
+      const compressedFiles = await Promise.all(newFiles.map(compressImage));
+
       const formData = new FormData();
       formData.append('title', title);
       formData.append('price', price);
-      files.forEach((file) => formData.append('images', file));
+      formData.append('category', category);
+      formData.append('description', description);
+      formData.append('existingImages', JSON.stringify(keptImages));
+      compressedFiles.forEach((file) => formData.append('images', file));
 
       await api.put(`/products/${id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -88,72 +99,65 @@ const EditProduct = () => {
     }
   };
 
-  if (loading) return <main className="mx-auto max-w-lg px-6 py-10 text-ink-secondary">Loading...</main>;
+  if (loading) {
+    return (
+      <main className="page-shell py-16">
+        <div className="mx-auto max-w-2xl animate-pulse space-y-4">
+          <div className="h-8 w-48 rounded bg-surface-strong" />
+          <div className="h-96 rounded-card bg-surface-strong" />
+        </div>
+      </main>
+    );
+  }
 
   return (
-    <main className="mx-auto max-w-lg px-6 py-10">
-      <h1 className="mb-6 text-[22px] font-semibold tracking-heading text-ink">Edit listing</h1>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          required
-          placeholder="Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="w-full rounded-btn border border-border/60 px-4 py-3 text-sm outline-none focus:shadow-hover"
-        />
-        <input
-          required
-          type="number"
-          min="0"
-          step="0.01"
-          placeholder="Price"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          onWheel={(e) => e.target.blur()}
-          className="w-full rounded-btn border border-border/60 px-4 py-3 text-sm outline-none focus:shadow-hover"
-        />
-
-        <div>
-          <p className="mb-2 text-xs text-ink-secondary">Current photos</p>
-          <div className="grid grid-cols-3 gap-2">
-            {existingImages.map((img) => (
-              <img key={img.publicId} src={img.url} alt="" className="aspect-square w-full rounded-btn object-cover" />
-            ))}
-          </div>
+    <main className="page-shell py-10 md:py-14">
+      <div className="mx-auto max-w-2xl">
+        <div className="mb-7">
+          <p className="section-kicker">Seller dashboard</p>
+          <h1 className="section-title mt-1">Edit listing</h1>
         </div>
 
-        <div>
-          <label className="inline-block cursor-pointer rounded-btn border border-border/60 px-4 py-3 text-sm text-ink hover:bg-surface">
-            Replace photos (optional, up to {MAX_IMAGES})
-            <input type="file" accept="image/*" multiple onChange={handleFilesChange} className="hidden" />
+        <form onSubmit={handleSubmit} className="surface-card p-5 sm:p-7">
+          <label className="block text-xs font-bold text-ink">
+            Item title
+            <input required value={title} onChange={(e) => setTitle(e.target.value)} className="input-modern mt-2" />
           </label>
-          <p className="mt-1 text-xs text-ink-disabled">
-            Uploading new photos here replaces ALL current photos — it doesn't add to them.
-          </p>
-        </div>
 
-        {previews.length > 0 && (
-          <div>
-            <p className="mb-2 text-xs text-ink-secondary">New photos (will replace current ones on save)</p>
-            <div className="grid grid-cols-3 gap-2">
-              {previews.map((src, i) => (
-                <img key={i} src={src} alt="" className="aspect-square w-full rounded-btn object-cover" />
-              ))}
+          <div className="mt-5 grid gap-5 sm:grid-cols-2">
+            <label className="block text-xs font-bold text-ink">
+              Price
+              <input required type="number" min="0" step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} onWheel={(e) => e.currentTarget.blur()} className="input-modern mt-2" />
+            </label>
+            <label className="block text-xs font-bold text-ink">
+              Category
+              <select required value={category} onChange={(e) => setCategory(e.target.value)} className="input-modern mt-2">
+                <option value="" disabled>Choose a category</option>
+                {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </label>
+          </div>
+
+          <label className="mt-5 block text-xs font-bold text-ink">
+            Description
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} maxLength={2000} className="input-modern mt-2 resize-none" />
+          </label>
+
+          <div className="mt-5">
+            <p className="text-xs font-bold text-ink">Product photos</p>
+            <p className="mt-1 text-xs text-ink-secondary">Tap a box to replace it, or the ✕ to remove it — untouched boxes keep their current photo.</p>
+            <div className="mt-2">
+              <ImageSlotUploader slots={slots} onSelect={handleSelect} onRemove={handleRemove} maxImages={MAX_IMAGES} disabled={submitting} />
             </div>
           </div>
-        )}
 
-        {error && <p className="text-xs text-error">{error}</p>}
+          {error && <p className="mt-4 rounded-xl bg-red-50 px-3 py-2 text-xs font-semibold text-error">{error}</p>}
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded-btn bg-primary py-3 text-sm font-medium text-white transition hover:shadow-hover disabled:opacity-50"
-        >
-          {submitting ? 'Saving...' : 'Save changes'}
-        </button>
-      </form>
+          <button type="submit" disabled={submitting} className="btn-primary mt-6 w-full py-3.5 disabled:opacity-50">
+            {submitting ? 'Saving…' : 'Save changes'}
+          </button>
+        </form>
+      </div>
     </main>
   );
 };
