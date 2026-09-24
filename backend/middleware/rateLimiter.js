@@ -1,6 +1,9 @@
 const rateLimit = require('express-rate-limit');
 
-// Brute-force protection on auth routes: max 5 attempts / 15 min / IP
+/**
+ * Rate limiting middleware for authentication routes.
+ * Prevents brute-force attacks by restricting each IP to 5 requests per 15-minute window.
+ */
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,

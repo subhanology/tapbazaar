@@ -4,9 +4,13 @@ import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import ProductCard from '../components/ProductCard';
 
-// Note: this filters client-side against the full product list. Fine for now —
-// if the catalog grows large, add a `?sellerId=` filter on GET /api/products
-// on the backend and switch this to pass that param instead.
+/**
+ * Renders the user's product listings page.
+ * Fetches all products and filters for those belonging to the authenticated user,
+ * providing options to view existing items or create a new listing.
+ * 
+ * @returns {JSX.Element} The MyListings component
+ */
 const MyListings = () => {
   const { user } = useAuth();
   const [listings, setListings] = useState([]);
@@ -24,7 +28,7 @@ const MyListings = () => {
     <main className="mx-auto max-w-7xl px-6 py-10">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-[22px] font-semibold tracking-heading text-ink">My Listings</h1>
-        <Link to="/products/new" className="rounded-btn bg-rausch px-4 py-2 text-sm font-medium text-white hover:shadow-hover">
+        <Link to="/products/new" className="rounded-btn bg-primary px-4 py-2 text-sm font-medium text-white hover:shadow-hover">
           + New listing
         </Link>
       </div>

@@ -3,12 +3,19 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Avatar from './Avatar';
 
+/**
+ * Renders a dropdown menu for authenticated users, accessible via their avatar.
+ * Provides navigation to account settings, user listings, and sign-out functionality.
+ * 
+ * @returns {JSX.Element} The AccountMenu component
+ */
 const AccountMenu = () => {
   const { user, signout } = useAuth();
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
   const navigate = useNavigate();
 
+  // Closes the dropdown menu when a click is detected outside of its DOM node
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) setOpen(false);
@@ -17,6 +24,10 @@ const AccountMenu = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  /**
+   * Handles user sign-out by closing the menu, clearing auth context, 
+   * and redirecting to the homepage.
+   */
   const handleSignout = async () => {
     setOpen(false);
     await signout();

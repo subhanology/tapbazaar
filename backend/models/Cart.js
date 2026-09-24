@@ -28,7 +28,7 @@ const cartSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// A cart belongs to either an authenticated user OR a guest session
+
 cartSchema.index(
   { userId: 1 },
   { unique: true, partialFilterExpression: { userId: { $type: 'objectId' } } }

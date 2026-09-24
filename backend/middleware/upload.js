@@ -1,9 +1,14 @@
 const multer = require('multer');
 
-// Files are kept in memory (as a Buffer) and streamed straight to Cloudinary —
-// nothing is ever written to disk on our own server.
 const storage = multer.memoryStorage();
 
+/**
+ * Validates the MIME type of incoming file uploads.
+ * Restricts uploads to JPEG, PNG, WEBP, and GIF formats.
+ * * @param {Object} _req - Express request object (unused)
+ * @param {Object} file - The file object provided by multer
+ * @param {Function} cb - Callback function to accept or reject the file
+ */
 const imageFileFilter = (_req, file, cb) => {
   const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
   if (!allowed.includes(file.mimetype)) {
@@ -12,10 +17,16 @@ const imageFileFilter = (_req, file, cb) => {
   cb(null, true);
 };
 
+/**
+ * Multer middleware instance configured for memory storage.
+ * Limits file size to 5MB and enforces image-only file types.
+ * Memory storage allows files to be streamed directly to external storage (e.g., Cloudinary)
+ * without being written to the local disk.
+ */
 const upload = multer({
   storage,
   fileFilter: imageFileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  limits: { fileSize: 5 * 1024 * 1024 },
 });
 
 module.exports = upload;

@@ -2,7 +2,12 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 /**
- * Requires a valid JWT (delivered via HttpOnly cookie). Attaches req.user.
+ * Authentication middleware that verifies a JWT from HttpOnly cookies and attaches the user object to the request.
+ * Blocks the request with a 401 response if the token is missing, invalid, or expired.
+ * 
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
  */
 const protect = async (req, res, next) => {
   try {
@@ -30,9 +35,12 @@ const protect = async (req, res, next) => {
 };
 
 /**
- * Optional auth: attaches req.user if a valid token is present, but never blocks
- * the request. Used on routes that behave differently for guests vs. logged-in users
- * (e.g. cart routes that fall back to guestSessionId).
+ * Optional authentication middleware that attaches the user object to the request if a valid token is present.
+ * Does not block unauthenticated requests, allowing controllers to handle guest fallbacks.
+ * 
+ * @param {Object} req - Express request object
+ * @param {Object} _res - Express response object (unused)
+ * @param {Function} next - Express next middleware function
  */
 const attachUserIfPresent = async (req, _res, next) => {
   try {
@@ -43,7 +51,7 @@ const attachUserIfPresent = async (req, _res, next) => {
     const user = await User.findById(decoded.userId);
     if (user) req.user = user;
   } catch (err) {
-    // silently ignore — request proceeds as guest
+    // Proceed without attaching user if token verification fails
   }
   next();
 };

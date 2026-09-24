@@ -10,11 +10,12 @@ const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
-// const commentUpdateRoutes = require('./routes/commentUpdateRoutes');
+const commentRoutes = require('./routes/commentRoutes');
+const commentUpdateRoutes = require('./routes/commentUpdateRoutes');
 const cartRoutes = require('./routes/cartRoutes');
-// const promoRoutes = require('./routes/promoRoutes');
+const promoRoutes = require('./routes/promoRoutes');
 const checkoutRoutes = require('./routes/checkoutRoutes');
-// const searchRoutes = require('./routes/searchRoutes');
+const searchRoutes = require('./routes/searchRoutes');
 
 connectDB();
 
@@ -36,11 +37,12 @@ app.use(cookieParser());
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
-// app.use('/api/comments', commentUpdateRoutes); 
+app.use('/api/comments', commentUpdateRoutes); 
+app.use('/api/products/:id/comments', commentRoutes);
 app.use('/api/cart', cartRoutes);
-// app.use('/api/promo', promoRoutes);
+app.use('/api/promo', promoRoutes);
 app.use('/api/checkout', checkoutRoutes);
-// app.use('/api/search', searchRoutes);
+app.use('/api/search', searchRoutes);
 
 app.get('/api/health', (_req, res) => res.status(200).json({ status: 'ok' }));
 

@@ -15,7 +15,13 @@ const mergeSchema = z.object({
   guestSessionId: z.string().min(1),
 });
 
-/** Resolves (and lazily creates) the cart for the current request — user or guest. */
+/**
+ * Resolves and lazily creates a cart for the current request context.
+ * Supports both authenticated users and guest sessions.
+ * 
+ * @param {Object} req - Express request object
+ * @returns {Promise<Object|null>} The cart document, or null if no identifier is provided
+ */
 const findOrCreateCart = async (req) => {
   if (req.user) {
     let cart = await Cart.findOne({ userId: req.user._id });
@@ -31,7 +37,14 @@ const findOrCreateCart = async (req) => {
   return cart;
 };
 
-// GET /api/cart
+/**
+ * Retrieves the current user's or guest's cart, fully populated with product details.
+ * Route: GET /api/cart
+ * 
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
 const getCart = async (req, res, next) => {
   try {
     const cart = await findOrCreateCart(req);
@@ -44,7 +57,14 @@ const getCart = async (req, res, next) => {
   }
 };
 
-// POST /api/cart/items
+/**
+ * Adds a new product to the cart or increments the quantity if it already exists.
+ * Route: POST /api/cart/items
+ * 
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
 const addItem = async (req, res, next) => {
   try {
     const { productId, quantity } = addItemSchema.parse(req.body);
@@ -52,7 +72,6 @@ const addItem = async (req, res, next) => {
     const product = await Product.findById(productId);
     if (!product) return res.status(404).json({ message: 'Product not found' });
 
-    // BR-02: cannot add own product to cart
     if (req.user && product.sellerId.toString() === req.user._id.toString()) {
       return res.status(400).json({ message: 'You cannot add your own product to the cart.' });
     }
@@ -79,7 +98,14 @@ const addItem = async (req, res, next) => {
   }
 };
 
-// PUT /api/cart/items/:productId
+/**
+ * Updates the quantity of a specific item currently in the cart.
+ * Route: PUT /api/cart/items/:productId
+ * 
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
 const updateItemQuantity = async (req, res, next) => {
   try {
     const { quantity } = updateItemSchema.parse(req.body);
@@ -102,7 +128,14 @@ const updateItemQuantity = async (req, res, next) => {
   }
 };
 
-// DELETE /api/cart/items/:productId
+/**
+ * Removes a specific item from the cart entirely.
+ * Route: DELETE /api/cart/items/:productId
+ * 
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
 const removeItem = async (req, res, next) => {
   try {
     const cart = await findOrCreateCart(req);
@@ -118,7 +151,15 @@ const removeItem = async (req, res, next) => {
   }
 };
 
-// POST /api/cart/merge — BR-03: guest cart -> authenticated user cart on login
+/**
+ * Merges a guest cart into an authenticated user's cart upon login.
+ * Resolves duplicate items by summing their quantities and discards products owned by the user.
+ * Route: POST /api/cart/merge
+ * 
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
 const mergeCart = async (req, res, next) => {
   try {
     const { guestSessionId } = mergeSchema.parse(req.body);
@@ -136,7 +177,6 @@ const mergeCart = async (req, res, next) => {
     let userCart = await Cart.findOne({ userId: req.user._id });
     if (!userCart) userCart = await Cart.create({ userId: req.user._id, items: [] });
 
-    // Filter out guest's own products (defense-in-depth for BR-02 during merge)
     const products = await Product.find({
       _id: { $in: guestCart.items.map((i) => i.productId) },
     });
@@ -144,11 +184,12 @@ const mergeCart = async (req, res, next) => {
 
     guestCart.items.forEach((guestItem) => {
       const pid = guestItem.productId.toString();
-      if (productOwnerMap.get(pid) === req.user._id.toString()) return; // skip own product
+      
+      if (productOwnerMap.get(pid) === req.user._id.toString()) return;
 
       const existing = userCart.items.find((i) => i.productId.toString() === pid);
       if (existing) {
-        existing.quantity += guestItem.quantity; // sum duplicate quantities
+        existing.quantity += guestItem.quantity;
       } else {
         userCart.items.push({ productId: guestItem.productId, quantity: guestItem.quantity });
       }

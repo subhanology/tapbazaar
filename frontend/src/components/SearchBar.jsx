@@ -4,6 +4,12 @@ import api from '../api/axios';
 
 const DEBOUNCE_MS = 300;
 
+/**
+ * Renders an interactive search bar with live auto-suggestions.
+ * Queries the API dynamically with a debounce mechanism to minimize network requests.
+ * 
+ * @returns {JSX.Element} The SearchBar component
+ */
 const SearchBar = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
@@ -11,7 +17,11 @@ const SearchBar = () => {
   const debounceRef = useRef(null);
   const navigate = useNavigate();
 
-  // 1. Handle the empty check directly in the event handler
+  /**
+   * Updates the search query state and clears results if the input is emptied.
+   * 
+   * @param {React.ChangeEvent<HTMLInputElement>} e - The input change event
+   */
   const handleInputChange = (e) => {
     const value = e.target.value;
     setQuery(value);
@@ -23,7 +33,6 @@ const SearchBar = () => {
   };
 
   useEffect(() => {
-    // 2. Simply exit early if empty, no state setting here
     if (!query.trim()) return;
 
     clearTimeout(debounceRef.current);
@@ -40,6 +49,11 @@ const SearchBar = () => {
     return () => clearTimeout(debounceRef.current);
   }, [query]);
 
+  /**
+   * Navigates to the selected product's detail page and resets the search state.
+   * 
+   * @param {string} id - The ID of the selected product
+   */
   const goToProduct = (id) => {
     setOpen(false);
     setQuery('');

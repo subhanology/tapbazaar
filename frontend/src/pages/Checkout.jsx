@@ -4,6 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { useCart } from '../context/CartContext';
 
+/**
+ * Renders the checkout page.
+ * Handles order total calculation, promotional code application, 
+ * and secure payment processing via Stripe.
+ * 
+ * @returns {JSX.Element} The Checkout component
+ */
 const Checkout = () => {
   const stripe = useStripe();
   const elements = useElements();
@@ -17,6 +24,10 @@ const Checkout = () => {
   const subtotal = cart.items?.reduce((sum, i) => sum + (i.productId?.price || 0) * i.quantity, 0) || 0;
   const total = subtotal - subtotal * discount;
 
+  /**
+   * Validates the entered promotional code against the backend API.
+   * Updates the discount state if valid, or sets an error message if invalid.
+   */
   const applyPromo = async () => {
     setError('');
     try {
@@ -28,6 +39,13 @@ const Checkout = () => {
     }
   };
 
+  /**
+   * Handles the submission of the payment form.
+   * Creates a Stripe payment method and sends the checkout payload to the server.
+   * Refreshes the global cart state and redirects to the home page upon success.
+   * 
+   * @param {React.FormEvent} e - Form submission event
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!stripe || !elements) return;
@@ -91,7 +109,7 @@ const Checkout = () => {
         <button
           type="submit"
           disabled={!stripe || submitting}
-          className="w-full rounded-btn bg-rausch py-3 text-sm font-medium text-white hover:shadow-hover disabled:opacity-50"
+          className="w-full rounded-btn bg-primary py-3 text-sm font-medium text-white hover:shadow-hover disabled:opacity-50"
         >
           {submitting ? 'Processing...' : `Pay $${total.toFixed(2)}`}
         </button>

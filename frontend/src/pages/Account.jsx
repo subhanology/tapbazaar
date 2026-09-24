@@ -5,6 +5,12 @@ import api from '../api/axios';
 
 const MAX_SIZE_MB = 5;
 
+/**
+ * Renders the user account management page.
+ * Allows users to select, preview, and upload a new profile picture.
+ * 
+ * @returns {JSX.Element} The Account component
+ */
 const Account = () => {
   const { user, updateUser } = useAuth();
   const [preview, setPreview] = useState(null);
@@ -13,6 +19,13 @@ const Account = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  /**
+   * Handles file selection from the input.
+   * Validates the file type (must be an image) and size limit.
+   * Generates a local object URL to display an immediate image preview.
+   * 
+   * @param {React.ChangeEvent<HTMLInputElement>} e - The file input change event
+   */
   const handleFileChange = (e) => {
     setError('');
     setSuccess('');
@@ -32,6 +45,10 @@ const Account = () => {
     setPreview(URL.createObjectURL(selected));
   };
 
+  /**
+   * Submits the selected profile picture to the server via FormData.
+   * Updates the global authentication context with the returned user object upon success.
+   */
   const handleUpload = async () => {
     if (!file) return;
     setUploading(true);
@@ -59,7 +76,7 @@ const Account = () => {
 
   return (
     <main className="mx-auto max-w-lg px-6 py-10">
-      <h1 className="mb-6 text-[22px] font-semibold tracking-heading text-ink">Account</h1>
+      <h1 className="mb-6 text-[22px] font-semibold tracking-heading text-link">Account</h1>
 
       <div className="rounded-card border border-border/30 p-6 shadow-card">
         <div className="flex items-center gap-5">
@@ -71,7 +88,7 @@ const Account = () => {
 
           <div className="flex-1">
             <p className="text-sm font-medium text-ink">{user?.email}</p>
-            <label className="mt-2 inline-block cursor-pointer text-sm text-legal">
+            <label className="mt-2 inline-block cursor-pointer text-sm text-link">
               Choose photo
               <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
             </label>
@@ -79,20 +96,20 @@ const Account = () => {
         </div>
 
         {error && <p className="mt-4 text-xs text-error">{error}</p>}
-        {success && <p className="mt-4 text-xs text-ink-secondary">{success}</p>}
+        {success && <p className="mt-4 text-xs text-link-secondary">{success}</p>}
 
         {file && (
           <button
             onClick={handleUpload}
             disabled={uploading}
-            className="mt-5 w-full rounded-btn bg-rausch py-3 text-sm font-medium text-white transition hover:shadow-hover disabled:opacity-50"
+            className="mt-5 w-full rounded-btn bg-primary py-3 text-sm font-medium text-white transition hover:shadow-hover disabled:opacity-50"
           >
             {uploading ? 'Uploading...' : 'Save profile picture'}
           </button>
         )}
       </div>
 
-      <p className="mt-4 text-xs text-ink-disabled">Images are stored securely on Cloudinary. Max {MAX_SIZE_MB}MB.</p>
+      <p className="mt-4 text-xs text-link-disabled">Images are stored securely on Cloudinary. Max {MAX_SIZE_MB}MB.</p>
     </main>
   );
 };

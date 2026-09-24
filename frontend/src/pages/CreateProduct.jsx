@@ -5,6 +5,13 @@ import api from '../api/axios';
 const MAX_IMAGES = 6;
 const MAX_SIZE_MB = 5;
 
+/**
+ * Renders the product creation page.
+ * Allows users to input listing details (title, price) and upload multiple images 
+ * with validation checks for file count and size limits.
+ * 
+ * @returns {JSX.Element} The CreateProduct component
+ */
 const CreateProduct = () => {
   const [title, setTitle] = useState('');
   const [price, setPrice] = useState('');
@@ -14,6 +21,12 @@ const CreateProduct = () => {
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
 
+  /**
+   * Validates selected files for count and size limits.
+   * Generates local object URLs for image previews.
+   * 
+   * @param {React.ChangeEvent<HTMLInputElement>} e - File input change event
+   */
   const handleFilesChange = (e) => {
     setError('');
     const selected = Array.from(e.target.files || []);
@@ -32,6 +45,12 @@ const CreateProduct = () => {
     setPreviews(selected.map((f) => URL.createObjectURL(f)));
   };
 
+  /**
+   * Submits the new product listing via multipart/form-data.
+   * Redirects the user to the newly created product's detail page upon success.
+   * 
+   * @param {React.FormEvent} e - Form submission event
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -104,7 +123,7 @@ const CreateProduct = () => {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded-btn bg-rausch py-3 text-sm font-medium text-white transition hover:shadow-hover disabled:opacity-50"
+          className="w-full rounded-btn bg-primary py-3 text-sm font-medium text-white transition hover:shadow-hover disabled:opacity-50"
         >
           {submitting ? 'Publishing...' : 'Publish listing'}
         </button>

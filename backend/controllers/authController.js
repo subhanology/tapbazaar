@@ -13,7 +13,14 @@ const signinSchema = z.object({
   password: z.string().min(1),
 });
 
-// POST /api/auth/signup
+/**
+ * Registers a new user, hashes their password, and sets an auth cookie.
+ * Route: POST /api/auth/signup
+ * 
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
 const signup = async (req, res, next) => {
   try {
     const { email, password } = signupSchema.parse(req.body);
@@ -23,7 +30,7 @@ const signup = async (req, res, next) => {
       return res.status(400).json({ message: 'An account with this email already exists.' });
     }
 
-    const salt = await bcrypt.genSalt(10); // min salt rounds = 10 per security spec
+    const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
     const user = await User.create({ email, passwordHash });
@@ -39,7 +46,14 @@ const signup = async (req, res, next) => {
   }
 };
 
-// POST /api/auth/signin
+/**
+ * Authenticates an existing user and sets an auth cookie.
+ * Route: POST /api/auth/signin
+ * 
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
 const signin = async (req, res, next) => {
   try {
     const { email, password } = signinSchema.parse(req.body);
@@ -65,7 +79,13 @@ const signin = async (req, res, next) => {
   }
 };
 
-// POST /api/auth/signout
+/**
+ * Clears the authentication token cookie to sign the user out.
+ * Route: POST /api/auth/signout
+ * 
+ * @param {Object} _req - Express request object (unused)
+ * @param {Object} res - Express response object
+ */
 const signout = async (_req, res) => {
   res.clearCookie('token', {
     httpOnly: true,
@@ -75,7 +95,13 @@ const signout = async (_req, res) => {
   res.status(200).json({ message: 'Signed out' });
 };
 
-// GET /api/auth/me
+/**
+ * Retrieves the currently authenticated user's profile data.
+ * Route: GET /api/auth/me
+ * 
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
 const getMe = async (req, res) => {
   res.status(200).json({ user: req.user });
 };

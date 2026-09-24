@@ -5,6 +5,13 @@ import api from '../api/axios';
 const MAX_IMAGES = 6;
 const MAX_SIZE_MB = 5;
 
+/**
+ * Renders the product editing page.
+ * Loads existing product details, handles updates to title, price, and images,
+ * and validates new file selections against count and size limits.
+ * 
+ * @returns {JSX.Element} The EditProduct component
+ */
 const EditProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -28,6 +35,12 @@ const EditProduct = () => {
     });
   }, [id]);
 
+  /**
+   * Validates selected replacement files for count and size limits.
+   * Generates local object URLs for image previews.
+   * 
+   * @param {React.ChangeEvent<HTMLInputElement>} e - File input change event
+   */
   const handleFilesChange = (e) => {
     setError('');
     const selected = Array.from(e.target.files || []);
@@ -46,6 +59,12 @@ const EditProduct = () => {
     setPreviews(selected.map((f) => URL.createObjectURL(f)));
   };
 
+  /**
+   * Submits the updated product listing via multipart/form-data.
+   * Redirects the user back to the product detail page upon success.
+   * 
+   * @param {React.FormEvent} e - Form submission event
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -130,7 +149,7 @@ const EditProduct = () => {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded-btn bg-rausch py-3 text-sm font-medium text-white transition hover:shadow-hover disabled:opacity-50"
+          className="w-full rounded-btn bg-primary py-3 text-sm font-medium text-white transition hover:shadow-hover disabled:opacity-50"
         >
           {submitting ? 'Saving...' : 'Save changes'}
         </button>
