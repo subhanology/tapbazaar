@@ -26,6 +26,7 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Never leak the hash in API responses
 userSchema.set('toJSON', {
   transform: (_doc, ret) => {
     delete ret.passwordHash;
